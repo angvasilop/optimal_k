@@ -24,10 +24,10 @@ theta <- mean((y - Ey)^2)
 
 # choose models
 variables<-list(1:3,
-                1:5
-                1:20
-                1:100
-                6:100
+                1:5,
+                1:20,
+                1:100,
+                6:100)
                 # c(1,2),c(1:3),c(1:4),c(1:5),c(1:10),
                 # c(1:20),c(1:35),c(1:55),c(1:100),c(1,6:15),
                 # c(1,6:50),c(1,2,6:15),c(1,2,6:50),c(1:3,6:15),c(1:3,6:50),
@@ -55,23 +55,24 @@ predictions <- c()
 set.seed(2022)
 for(j in 1:nsim){
   ind <- sample(1:N, n, replace = FALSE)
-  dat <- as.matrix(data.frame(Y = y[ind],x[ind,]))
+  #dat <- as.matrix(data.frame(Y = y[ind],x[ind,]))
   for(l in 1:length(k)){ # choose lth fold number to test
-    fold <- sample(1:k[l], nrow(dat), replace = TRUE)
+    fold <- sample(1:k[l], n, replace = TRUE)
     for(i in 1:k[l]){ # outer cv loop
       for(m in 1:n_mod){print(c(j, l, i, m))
-        best.lam[m] <- cv.glmnet(x[, variables[[m]]], y[fold != i], alpha = 1, folds = 5)$lambda.min # inner cv loop
-        mod[[m]] <- glmnet(x[, variables[[m]]], y[fold != i, ], alpha = 1, lambda = best.lam[m])
-        y_hat[m, ] <- predict(mod[[m]], x[, variables[[m]]])
+        best.lam[m] <- cv.glmnet(as.matrix(x[ind, variables[[m]]][fold != i,]), y[ind][fold != i], alpha = 1, folds = 5)$lambda.min # inner cv loop
+        mod[[m]] <- glmnet(as.matrix(x[ind, variables[[m]]][fold != i,]), y[ind][fold != i], alpha = 1, lambda = best.lam[m])
+        y_hat[fold == i,m] <- predict(mod[[m]], as.matrix(x[ind, variables[[m]]][fold == i,]))
       }
     }
     for(m in 1:n_mod){
-      results[j, l, m] <- mean((j[, 1] - dat[, p])^2)
+      results[j, l, m] <- mean((y[ind] - y_hat[, m])^2)
     }
   }
 }
 
 
+save(results, file = "/results20230223.RData")
 
 
 
@@ -82,42 +83,4 @@ for(j in 1:nsim){
 
 
 
-
-# prepare output matrix
-mse.hat <- array(data = NA, dim = c(nsim, length(k), n_mod))
-
-# loop 2
-set.seed(2022)
-for(j in 1:nsim){
-  ind <- sample(1:N, n, replace = FALSE)
-  dat <- as.matrix(data.frame(Y = y[ind], x[ind, ]))
-  for(f in k){
-    for(m in 1:n_mod){print(c(j, f, m))
-      cv.fit <- cv.glmnet(dat[, variables[[m]] + 1], dat[, 1], alpha = 1, folds = f)
-      mse.hat[j, which(k == f), m] <- cv.fit$cvm[cv.fit$lambda == cv.fit$lambda.min]
-    }
-  }
-}
-
-# read results
-theta.hat <- mse.hat <- readRDS("mse_lasso_simulation.rds")
-
-# biassq + var = mse
-biassq <- (apply(theta.hat, c(2, 3), mean) - theta)^2
-var <- apply(theta.hat, c(2, 3), var)
-mse <- apply((theta.hat - theta)^2, c(2, 3), mean)
-
-# biassq, variance, mse plots
-model <- 4
-plot(k, biassq[, model])
-plot(k, var[, model])
-plot(k, mse[, model])
-
-# which value of k chooses the correct model (4) in the greatest number of simulations?
-results <- matrix(nrow = nsim, ncol = 8)
-for(sim in 1:nsim){print(sim)
-  results[sim, ] <- apply(mse.d[sim, , ], 1, which.min)
-}
-corrects <- colSums(results == 4)
-plot(k, corrects)
 
