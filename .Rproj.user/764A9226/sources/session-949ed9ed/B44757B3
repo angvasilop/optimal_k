@@ -3,7 +3,7 @@
     "path": "~/Documents/research/optimal_k/simulation_rnorm_lasso_new.R",
     "project_path": null,
     "type": "r_source",
-    "hash": "0",
+    "hash": "3234234530",
     "contents": "",
     "dirty": false,
     "created": 1677183878566.0,
@@ -17,11 +17,11 @@
         "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1680020782,
+    "lastKnownWriteTime": 1680022040,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1680020782040,
+    "last_content_update": 1680022040051,
     "read_only": false,
     "read_only_alternatives": []
 }
