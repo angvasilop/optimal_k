@@ -68,9 +68,9 @@ out <- readRDS("~/Documents/research/optimal_k/results/parallel_simulation_linea
 theta.hat <- mse.hat <- array(unlist(out), dim = c(length(k), n_mod, nsim))
 
 # biassq + var = mse
-biassq <- (apply(theta.hat, c(2, 3), mean) - theta)^2
-var <- apply(theta.hat, c(2, 3), var)
-mse <- apply((theta.hat - theta)^2, c(2, 3), mean)
+biassq <- (apply(theta.hat, c(1, 2), mean) - theta)^2
+var <- apply(theta.hat, c(1, 2), var)
+mse <- apply((theta.hat - theta)^2, c(1, 2), mean)
 
 # plots
 library(plotrix)
@@ -85,12 +85,12 @@ legend(600, 250, legend=c("1:3", "1:5", "1:20", "1:100", "6:100"),
        col=c("black", "blue", "red", "purple", "green"), lty = 1, cex = 0.8)
 
 # variance plot
-plot(k, var[, 1], type = "b", ylim = c(0, 10), ylab = "var")
+plot(k, var[, 1], type = "b", ylim = c(10, 70), ylab = "var")
 points(k, var[, 2], type = "b", col = "blue")
 points(k, var[, 3], type = "b", col = "red")
 points(k, var[, 4], type = "b", col = "purple")
 points(k, var[, 5], type = "b", col = "green")
-legend(600, 8, legend=c("1:3", "1:5", "1:20", "1:100", "6:100"),
+legend(600, 50, legend=c("1:3", "1:5", "1:20", "1:100", "6:100"),
        col=c("black", "blue", "red", "purple", "green"), lty = 1, cex = 0.8)
 
 # MSE plot
