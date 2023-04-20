@@ -27,7 +27,7 @@ variables<-list(1:3, 1:5, 1:20, 1:100, 6:100)
 # loop settings
 n <- 1000
 nsim <- 1000
-k <- seq(2, 100, 2)
+k <- seq(2, 100, 2) # c(2, 10, 100, 500, 1000)
 n_mod <- length(variables)
 
 # create objects
@@ -105,8 +105,8 @@ legend(800, 30, legend=c("1:3", "1:5", "1:20", "1:100", "6:100"),
        col=c("black", "blue", "red", "purple", "green"), lty = 1, cex = 0.8)
 
 # which k results in the correct model having the lowest MSE the most often?
-results <- matrix(nrow = 1000, ncol = 50)
-for(sim in 1:1000){
+results <- matrix(nrow = nsim, ncol = length(k))
+for(sim in 1:nsim){
   results[sim, ] <- apply(theta.hat[,, sim], 1, which.min)
 }
 corrects <- colSums(results == 2)
