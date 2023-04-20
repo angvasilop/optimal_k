@@ -66,7 +66,7 @@ out <- foreach(j = 1:nsim, .combine = "list", .packages = "glmnet") %dopar% {
 }
 
 # read results
-out <- readRDS("~/Documents/research/optimal_k/results/parallel_simulation_lasso_output.rds")
+out <- readRDS("~/Documents/research/optimal_k/results/parallel_simulation_lasso_output_k_2_100.rds")
 theta.hat <- mse.hat <- array(unlist(out), dim = c(length(k), n_mod, nsim))
 
 # biassq + var = mse
@@ -78,7 +78,7 @@ mse <- apply((theta.hat - theta)^2, c(1, 2), mean)
 library(plotrix)
 
 # bias^2 plot
-plot(k, biassq[, 1], type = "b", ylim = c(0, 40), ylab = "bias^2")
+plot(k, biassq[, 1], type = "b", xlim = c(0, 20), ylim = c(0, 35), ylab = "bias^2")
 points(k, biassq[, 2], type = "b", col = "blue")
 points(k, biassq[, 3], type = "b", col = "red")
 points(k, biassq[, 4], type = "b", col = "purple")
@@ -87,7 +87,7 @@ legend(800, 20, legend=c("1:3", "1:5", "1:20", "1:100", "6:100"),
        col=c("black", "blue", "red", "purple", "green"), lty = 1, cex = 0.8)
 
 # variance plot
-plot(k, var[, 1], type = "b", ylim = c(18, 23), ylab = "var")
+plot(k, var[, 1], type = "b", xlim = c(0, 20), ylim = c(20, 23), ylab = "var")
 points(k, var[, 2], type = "b", col = "blue")
 points(k, var[, 3], type = "b", col = "red")
 points(k, var[, 4], type = "b", col = "purple")
@@ -105,7 +105,7 @@ legend(800, 30, legend=c("1:3", "1:5", "1:20", "1:100", "6:100"),
        col=c("black", "blue", "red", "purple", "green"), lty = 1, cex = 0.8)
 
 # which k results in the correct model having the lowest MSE the most often?
-results <- matrix(nrow = 1000, ncol = 5)
+results <- matrix(nrow = 1000, ncol = 50)
 for(sim in 1:1000){
   results[sim, ] <- apply(theta.hat[,, sim], 1, which.min)
 }
