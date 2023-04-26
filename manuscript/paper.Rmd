@@ -1,0 +1,81 @@
+---
+title: |
+  |  \Large Optimal K: some titles
+author: |
+ | \large Mena Whalen 
+  \vspace{-1.1mm}
+   \normalsize Department of Mathematics and Statistics \vspace{-1mm}
+  | \normalsize Loyola University Chicago \vspace{-1mm}
+   | \normalsize Chicago, IL 60660 \vspace{-1mm}
+   | \normalsize [`mwhalen3@luc.edu`](mailto:mwhalen3@luc.edu) \vspace{-1mm}
+  
+   \large Gregory J. Matthews 
+  \vspace{-1.1mm}
+   \normalsize Department of Mathematics and Statistics \vspace{-1mm}
+   \normalsize Loyola University Chicago \vspace{-1mm}
+   \normalsize Chicago, IL 60660 \vspace{-1mm}
+   \normalsize [`gmatthews1@luc.edu`](mailto:gmatthews1@luc.edu) \vspace{-1mm}
+   
+abstract: |
+  | Abstract \vspace{2mm}
+  | *Keywords*: Cross validation  
+bibliography: references.bib
+fontsize: 12pt
+link-citations: true
+linkcolor: cyan
+urlcolor: cyan
+output:
+  pdf_document:
+    df_print: kable
+    number_sections: true
+    keep_tex: true
+header-includes:
+ \usepackage{setspace}
+ \setstretch{1.15}
+ \usepackage{float}
+ \floatplacement{figure}{t}
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+knitr::opts_chunk$set(
+	echo = FALSE,
+	fig.align = "center",
+	message = FALSE,
+	warning = FALSE
+)
+
+gjm <- function(x, color = "red") {
+  sprintf("\\textcolor{%s}{%s}", color, x)}
+```
+
+\newpage
+
+# Introduction {#sec:intro}
+We wanted to look at how the choice of k in k-fold cross validation affected the estimation of the prediction error. 
+
+Literature review.
+
+# Simulation Study
+This is how you cite a paper: @R2022language
+
+Simulations were performed using the R programming language (@R2022language).  
+
+Describe simulation studty with LASSO.
+
+# Results
+We find blah blah
+
+#Conclusions 
+Early work found this.  More recent work found this.  Our work confirms that.  We suggest........ 
+
+Future work?  What else would we like to do?  
+
+# Acknowledgements {-}
+
+Everyone who took STAT338 in Fall 2022.  
+
+# Supplementary Material {-}
+
+All code for reproducing the analyses in this paper is publicly available at https://github.com/gjm112/optimal_k
+
+# References
