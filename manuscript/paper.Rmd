@@ -1,21 +1,8 @@
 ---
-title: |
-  |  \Large Optimal K: some titles
-author: |
- | \large Mena Whalen 
-  \vspace{-1.1mm}
-   \normalsize Department of Mathematics and Statistics \vspace{-1mm}
-  | \normalsize Loyola University Chicago \vspace{-1mm}
-   | \normalsize Chicago, IL 60660 \vspace{-1mm}
-   | \normalsize [`mwhalen3@luc.edu`](mailto:mwhalen3@luc.edu) \vspace{-1mm}
-  
-   \large Gregory J. Matthews 
-  \vspace{-1.1mm}
-   \normalsize Department of Mathematics and Statistics \vspace{-1mm}
-   \normalsize Loyola University Chicago \vspace{-1mm}
-   \normalsize Chicago, IL 60660 \vspace{-1mm}
-   \normalsize [`gmatthews1@luc.edu`](mailto:gmatthews1@luc.edu) \vspace{-1mm}
-   
+title: "test"
+author: 
+  - "Angelos Vasilopoulos"
+  - "Gregory J. Matthews"
 abstract: |
   | Abstract \vspace{2mm}
   | *Keywords*: Cross validation  
