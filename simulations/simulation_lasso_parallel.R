@@ -25,9 +25,13 @@ theta <- mean((y - Ey)^2)
 variables<-list(1:3, 1:5, 1:20, 1:100, 6:100)
 
 # loop settings
-n <- 1000
+n <- 750 # 250 # 500 # 100 # 1000
 nsim <- 1000
-k <- seq(2, 100, 2) # c(2, 10, 100, 500, 1000)
+# k <- seq(2, 100, 2) # for n = 100 and n = 1000
+# k <- c(2, seq(10, 250, 10)) # for n = 250
+k <- c(2, seq(10, 500, 10)) # for n = 500
+# k <- c(2, seq(10, 750, 10)) # for n = 750
+# k <- c(2, 10, 100, 500, 1000) # for n = 1000
 n_mod <- length(variables)
 
 # create objects
@@ -66,7 +70,7 @@ out <- foreach(j = 1:nsim, .combine = "list", .packages = "glmnet") %dopar% {
 }
 
 # read results
-out <- readRDS("~/Documents/research/optimal_k/results/parallel_simulation_lasso_output_k_2_100.rds")
+out <- readRDS("~/Documents/research/optimal_k/results/parallel_simulation_lasso_output_k_2_500_n_500.rds")
 theta.hat <- mse.hat <- array(unlist(out), dim = c(length(k), n_mod, nsim))
 
 # biassq + var = mse
@@ -78,7 +82,7 @@ mse <- apply((theta.hat - theta)^2, c(1, 2), mean)
 library(plotrix)
 
 # bias^2 plot
-plot(k, biassq[, 1], type = "b", xlim = c(0, 20), ylim = c(0, 35), ylab = "bias^2")
+plot(k, biassq[, 1], type = "b", ylim = c(min(biassq), max(biassq)), ylab = "bias^2")
 points(k, biassq[, 2], type = "b", col = "blue")
 points(k, biassq[, 3], type = "b", col = "red")
 points(k, biassq[, 4], type = "b", col = "purple")
@@ -87,7 +91,7 @@ legend(800, 20, legend=c("1:3", "1:5", "1:20", "1:100", "6:100"),
        col=c("black", "blue", "red", "purple", "green"), lty = 1, cex = 0.8)
 
 # variance plot
-plot(k, var[, 1], type = "b", xlim = c(0, 20), ylim = c(20, 23), ylab = "var")
+plot(k, var[, 1], type = "b", ylim = c(min(var), max(var)), ylab = "var")
 points(k, var[, 2], type = "b", col = "blue")
 points(k, var[, 3], type = "b", col = "red")
 points(k, var[, 4], type = "b", col = "purple")
@@ -96,7 +100,7 @@ legend(800, 22, legend=c("1:3", "1:5", "1:20", "1:100", "6:100"),
        col=c("black", "blue", "red", "purple", "green"), lty = 1, cex = 0.8)
 
 # MSE plot
-plot(k, mse[, 1], type = "b", ylim = c(0, 60), ylab = "MSE")
+plot(k, mse[, 1], type = "b", ylim = c(min(mse), max(mse)), ylab = "MSE")
 points(k, mse[, 2], type = "b", col = "blue")
 points(k, mse[, 3], type = "b", col = "red")
 points(k, mse[, 4], type = "b", col = "purple")
@@ -110,5 +114,11 @@ for(sim in 1:nsim){
   results[sim, ] <- apply(theta.hat[,, sim], 1, which.min)
 }
 corrects <- colSums(results == 2)
-plot(k, corrects, type = "b", ylab = "How many times correct model had lowest MSE")
+plot(k, corrects, type = "b", ylab = "How many times correct model had lowest MSE (n = 250)")
+
+samplesize <- c(100, 250, 500, 1000)
+optimalk <- c(24, 80, 30, 4)
+
+abline(plot(samplesize, optimalk))
+
 
