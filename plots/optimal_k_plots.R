@@ -38,10 +38,10 @@ k <- list(n100 = seq(2, 100, 2),
           n500 = c(2, seq(10, 500, 10)),
           n1000 = c(2, 10, 100, 500, 1000)) # for n = 1000
 n_mod <- length(variables)
-out <- list(n100 = readRDS("~/Documents/research/optimal_k/results/parallel_simulation_lasso_output_k_2_100_n_100.rds"),
-            n250 = readRDS("~/Documents/research/optimal_k/results/parallel_simulation_lasso_output_k_2_250_n_250.rds"),
-            n500 = readRDS("~/Documents/research/optimal_k/results/parallel_simulation_lasso_output_k_2_500_n_500.rds"),
-            n1000 = readRDS("~/Documents/research/optimal_k/results/parallel_simulation_lasso_output.rds"))
+out <- list(n100 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_100_n_100.rds"),
+            n250 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_250_n_250.rds"),
+            n500 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_500_n_500.rds"),
+            n1000 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_1000_n_1000.rds"))
 titles <- list("n = 100", "n = 250", "n = 500", "n = 1000")
 plotsout <- list(list(), list(), list())
 figures <- list()

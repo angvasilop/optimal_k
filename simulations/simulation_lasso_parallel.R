@@ -27,6 +27,7 @@ variables<-list(1:3, 1:5, 1:20, 1:100, 6:100)
 # loop settings
 n <- 750 # 250 # 500 # 100 # 1000
 nsim <- 1000
+# k <- c(seq(2, 100, 2), 500, 1000)
 # k <- seq(2, 100, 2) # for n = 100 and n = 1000
 # k <- c(2, seq(10, 250, 10)) # for n = 250
 k <- c(2, seq(10, 500, 10)) # for n = 500
@@ -70,7 +71,7 @@ out <- foreach(j = 1:nsim, .combine = "list", .packages = "glmnet") %dopar% {
 }
 
 # read results
-out <- readRDS("~/Documents/research/optimal_k/results/parallel_simulation_lasso_output_k_2_500_n_500.rds")
+out <- readRDS("~/optimal_k_git/results/parallel_simulation_lasso_output_k_2_500_n_500 copy.rds")
 theta.hat <- mse.hat <- array(unlist(out), dim = c(length(k), n_mod, nsim))
 
 # biassq + var = mse
@@ -115,10 +116,11 @@ for(sim in 1:nsim){
 }
 corrects <- colSums(results == 2)
 plot(k, corrects, type = "b", ylab = "How many times correct model had lowest MSE (n = 250)")
+df <- data.frame(k, corrects)
 
+# plot
 samplesize <- c(100, 250, 500, 1000)
-optimalk <- c(24, 80, 30, 4)
-
+optimalk <- c(24, 80, 70, 4)
 abline(plot(samplesize, optimalk))
 
 
