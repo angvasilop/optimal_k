@@ -1,3 +1,4 @@
+
 # create population
 N <- 500000
 x<-data.frame(matrix(nrow=500000,ncol=100))
@@ -22,17 +23,13 @@ y <- Ey + rnorm(nrow(x),0,sigma)
 theta <- mean((y - Ey)^2)
 
 # choose models
-variables<-list(1:3, 1:5, 1:20, 1:100, 6:100)
+variables <- list(1:3, 1:5, 1:20, 1:100, 6:100)
 
 # loop settings
-n <- 750 # 250 # 500 # 100 # 1000
+# 2, 10, 20, 30, ..., 100, n/2, n
+n <- 1000
+k <- c(2, 10, seq(n/10, n, n/10))
 nsim <- 1000
-# k <- c(seq(2, 100, 2), 500, 1000)
-# k <- seq(2, 100, 2) # for n = 100 and n = 1000
-# k <- c(2, seq(10, 250, 10)) # for n = 250
-k <- c(2, seq(10, 500, 10)) # for n = 500
-# k <- c(2, seq(10, 750, 10)) # for n = 750
-# k <- c(2, 10, 100, 500, 1000) # for n = 1000
 n_mod <- length(variables)
 
 # create objects
@@ -71,7 +68,7 @@ out <- foreach(j = 1:nsim, .combine = "list", .packages = "glmnet") %dopar% {
 }
 
 # read results
-out <- readRDS("~/optimal_k_git/results/parallel_simulation_lasso_output_k_2_500_n_500 copy.rds")
+out <- readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_1000_100_n_1000.rds")
 theta.hat <- mse.hat <- array(unlist(out), dim = c(length(k), n_mod, nsim))
 
 # biassq + var = mse
@@ -115,12 +112,25 @@ for(sim in 1:nsim){
   results[sim, ] <- apply(theta.hat[,, sim], 1, which.min)
 }
 corrects <- colSums(results == 2)
-plot(k, corrects, type = "b", ylab = "How many times correct model had lowest MSE (n = 250)")
-df <- data.frame(k, corrects)
+plot(k, corrects)
 
-# plot
-samplesize <- c(100, 250, 500, 1000)
-optimalk <- c(24, 80, 70, 4)
-abline(plot(samplesize, optimalk))
+# nls
+nls.fit <- nls(corrects ~ a*k + b + c*k^-1 + d*k^-2, start = list(a = -1, b = 660, c = 14.5, d = 0))
+.a <- coef(nls.fit)[1]
+.b <- coef(nls.fit)[2]
+.c <- coef(nls.fit)[3]
+.d <- coef(nls.fit)[4]
+eq <- function(x){.a*x + .b + .c*x^-1 + .d*x^-2}
+pred <- eq(2:n)
+lines(pred, type = "l")
+
+# elbow point, optimal.k/n vs. n (n/10 scheme)
+library("smerc")
+elbow_point(2:n, pred)$x
+samp.n <- c(250, 500, 750, 1000)
+opt.k <- c(17, 17, 8, 8)
+plot(samp.n, opt.k/samp.n)
+
+# elbow point, optimal.k/n vs. n (n/10 scheme)
 
 

@@ -38,12 +38,12 @@ k <- list(n100 = seq(2, 100, 2),
           n500 = c(2, seq(10, 500, 10)),
           n1000 = c(2, 10, 100, 500, 1000)) # for n = 1000
 n_mod <- length(variables)
-out <- list(n100 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_100_n_100.rds"),
-            n250 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_250_n_250.rds"),
-            n500 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_500_n_500.rds"),
-            n1000 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_1000_n_1000.rds"))
+out <- list(n100 = readRDS("~/optimal_k_git/results/extra/parallel_simulation_lasso_output_k_2_100_n_100.rds"),
+            n250 = readRDS("~/optimal_k_git/results/extra/parallel_simulation_lasso_output_k_2_250_n_250.rds"),
+            n500 = readRDS("~/optimal_k_git/results/extra/parallel_simulation_lasso_output_k_2_500_n_500.rds"),
+            n1000 = readRDS("~/optimal_k_git/results/extra/parallel_simulation_lasso_output_k_2_1000_n_1000.rds"))
 titles <- list("n = 100", "n = 250", "n = 500", "n = 1000")
-plotsout <- list(list(), list(), list())
+plotsout <- list(list(), list(), list(), list())
 figures <- list()
 
 for(i in 1:length(out)){
@@ -96,16 +96,16 @@ for(i in 1:length(metrics)){
 
 
 
-figure1 <- annotate_figure(figures[[1]],
-                top = text_grob("Squared bias vs. k", size = 10, x = 0.4),
+figure4 <- annotate_figure(figures[[1]],
+                top = text_grob("LASSO regression: squared bias vs. k", size = 10, x = 0.4),
                 bottom = text_grob("k", size = 10, x = 0.4),
                 left = text_grob("Squared bias", size = 10, rot = 90))
-figure2 <- annotate_figure(figures[[2]],
-                top = text_grob("Variance vs. k", size = 10, x = 0.4),
+figure5 <- annotate_figure(figures[[2]],
+                top = text_grob("LASSO regression: variance vs. k", size = 10, x = 0.4),
                 bottom = text_grob("k", size = 10, x = 0.4),
                 left = text_grob("Variance", size = 10, rot = 90))
-figure3 <- annotate_figure(figures[[3]],
-                top = text_grob("Mean squared error (MSE) vs. k", size = 10, x = 0.4),
+figure6 <- annotate_figure(figures[[3]],
+                top = text_grob("LASSO regression: mean squared error (MSE) vs. k", size = 10, x = 0.4),
                 bottom = text_grob("k", size = 10, x = 0.4),
                 left = text_grob("MSE", size = 10, rot = 90))
 
@@ -122,16 +122,26 @@ for(i in 1:length(n)){
   }
   corrects <- counts[[i]] <- colSums(results == 2)
   
+  # fit
+  nls.fit <- nls(corrects ~ b*k[[i]] + c + d*k[[i]]^-1 + e*k[[i]]^-2, start = list(b = -1, c = 660, d = 14.5, e = 0))
+  .b <- coef(nls.fit)[1]
+  .c <- coef(nls.fit)[2]
+  .d <- coef(nls.fit)[3]
+  .e <- coef(nls.fit)[4]
+  eq <- function(x){.b*x + .c + .d*x^-1 + .e*x^-2}
+  pred <- eq(2:n[[i]])
+  
   # plot
-  optplotsout[[i]] <- ggplot(data.frame(k = k[[i]], corrects), aes(x = k))+
-    geom_line(aes(y = corrects)) +
+  optplotsout[[i]] <- ggplot(NULL)+
+    geom_point(data = data.frame(f = k[[i]], corrects), aes(x = f, y = corrects), size = 0.1) +
+    geom_line(data = data.frame(f = 2:n[[i]], pred), aes(x = f, y = pred), size = 0.4, color = "black") +
     ggtitle(paste(titles[i])) +
     labs(x = NULL, y = NULL) +
     theme(panel.grid.major=element_blank(),
           panel.grid.minor=element_blank(),
           panel.background=element_blank(),
-          axis.line=element_line(colour="black",size=0.4),
-          axis.text=element_text(size=10,color="black"),
+          axis.line=element_line(colour="black", size=0.4),
+          axis.text=element_text(size=10, color="black"),
           plot.title=element_text(hjust=0.5,size=10, color = "black"))
 }
 
@@ -146,14 +156,7 @@ optfigures <- ggarrange(optplotsout[[1]] + rremove("ylab") + rremove("xlab"),
                      align = "hv", 
                      font.label = list(size = 10, color = "black", family = NULL, position = "top"))
 
-figure4 <- annotate_figure(optfigures,
-                top = text_grob("Lowest error model selection", size = 10),
+figure8 <- annotate_figure(optfigures,
+                top = text_grob("LASSO regression: lowest error model selection", size = 10),
                 bottom = text_grob("k", size = 10),
                 left = text_grob("Number of times true model has lowest MSE", size = 10, rot = 90))
-
-dffortable <- data.frame(n = c(100, 250, 500, 1000),
-                         Minimum = c(min(counts[[1]]), min(counts[[2]]), min(counts[[3]]), min(counts[[4]])),
-                         Maximum = c(max(counts[[1]]), max(counts[[2]]), max(counts[[3]]), max(counts[[4]])),
-                         Range = c(max(counts[[1]]) - min(counts[[1]]), max(counts[[2]]) - min(counts[[2]]), max(counts[[3]]) - min(counts[[3]]), max(counts[[4]]) - min(counts[[4]])),
-                         Variance = c(var(counts[[1]]), var(counts[[2]]), var(counts[[3]]), var(counts[[4]])))
-

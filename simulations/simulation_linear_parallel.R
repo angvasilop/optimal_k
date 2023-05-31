@@ -26,7 +26,7 @@ theta <- mean((y - Ey)^2)
 variables<-list(1:3, 1:5, 1:20, 1:100, 6:100)
 
 # loop settings
-n <- 500 # 1000
+n <- 400
 nsim <- 1000
 k <- c(2, seq(10, n, 10)) # c(2, 10, 100, 500, 1000)
 n_mod <- length(variables)
@@ -65,7 +65,7 @@ out <- foreach(j = 1:nsim, .combine = "list") %dopar% {
 }
 
 # read results
-out <- readRDS("~/optimal_k_git/results/linear/parallel_simulation_linear_output_k_2_500_n_500.rds")
+out <- readRDS("~/optimal_k_git/results/linear/parallel_simulation_linear_output_k_2_400_n_00.rds")
 theta.hat <- mse.hat <- array(unlist(out), dim = c(length(k), n_mod, nsim), dimnames = list(rep("k", length(k)), rep("mod", n_mod), rep("sim", nsim)))
 
 # biassq + var = mse
@@ -109,37 +109,50 @@ for(sim in 1:nsim){
   results[sim, ] <- apply(theta.hat[,, sim], 1, which.min)
 }
 corrects <- colSums(results == 2)
-df <- data.frame(k, corrects)
-plot(df$k, df$corrects)
+plot(k, corrects)
 
 # nls
-nls.fit <- nls(corrects ~ a*k^-1 + b, start = list(a = 14.5, b = 660))
-.a <- coef(nls.fit)[1]
-.b <- coef(nls.fit)[2]
-eq <- function(x){.a*(x)^-1 + .b}
-lines(eq(0:700), type = "l")
+nls.fit <- nls(corrects ~ c + d*k^-1, start = list(c = 970, d = -208))
+.c <- coef(nls.fit)[1]
+.d <- coef(nls.fit)[2]
+eq <- function(x){.c + .d*x^-1}
+pred <- eq(2:n)
+lines(pred, type = "l")
+
+# elbow point, optimal.k/n vs. n
+library("smerc")
+elbow_point(2:n, pred)$x
+samp.n <- seq(100, 1000, 100)
+opt.k <- c(14/100, 20/200, 24/300, 28/400, 32/500, 35/600, 37/700, 40/800, 42/900, 45/1000) # departing from LOOCV
+plot(samp.n, opt.k)
+
+
+
+
+
+
+opt.k.elb <- c(20/100, 20/200, 30/300, 30/400, 30/500, 30/600, 30/700, 20/800, 10/900)
+opt.k.lo <- c(79/100, 52/200, 75/300, 104/400, 128/500, 159/600, 180/700, 208/800, 233/900)
 
 # Mann-Kendall tests
-df$pred <- predict(nls.fit, df$k)
+df <- data.frame(k, corrects, pred)
 df$pval <- c()
 library(Kendall)
 for(i in 1:(length(df$pred) - 2)){
   df$pval[i] <- MannKendall(df$pred[i:length(df$pred)])$sl
 }
 df$pval[(length(df$pred) - 1):length(df$k)] <- 0
-length(df$pval)
-df$k[which.max(df$pval[df$pval < 0.05])]
-df$k[which.max(df$pval[df$pval < 0.05])]/n
-
+df$k[which.max(df$pval[df$pval < 0.05/(n/10 - 1)])]
+df$k[which.max(df$pval[df$pval < 0.05/(n/10 - 1)])]/n
 # k vs. n
-sample.size <- seq(100, 700, 100)
-k.opt.corrected <- c(0.4,0.65,0.767,0.825,0.86, 0.867,0.886)
+sample.size <- seq(100, 900, 100)
+k.opt.corrected <- c(0.4,0.65,0.767,0.825,0.86, 0.883, 0.886, 0.9, 0.911)
 plot(sample.size, k.opt.corrected, xlab = "sample.size (n)", ylab = "k.optimal/n")
+logit(k.optimal.corrected)
 
-# second fit
-nls.fit <- nls(k.opt.corrected ~ a*sample.size^-1 + b, start = list(a = 1, b = 0))
-.a <- coef(nls.fit)[1]
-.b <- coef(nls.fit)[2]
-eq <- function(x){.a*(x)^-1 + .b}
-lines(eq(0:n), type = "l")
-
+ss.fit <- smooth.spline(k, corrects)
+pred <- predict(ss.fit, 2:n)$y
+lines(pred)
+elbow_point(2:n, pred)$x
+samp.n <- seq(200, 900, 100)
+opt.k.ss <- c(14, 24, 48, 28, 31, 6, 16, 26)
