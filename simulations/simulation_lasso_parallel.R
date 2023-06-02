@@ -27,8 +27,8 @@ variables <- list(1:3, 1:5, 1:20, 1:100, 6:100)
 
 # loop settings
 # 2, 10, 20, 30, ..., 100, n/2, n
-n <- 1000
-k <- c(2, 10, seq(n/10, n, n/10))
+n <- 750
+k <- c(2, seq(10, n, 10))
 nsim <- 1000
 n_mod <- length(variables)
 
@@ -68,7 +68,7 @@ out <- foreach(j = 1:nsim, .combine = "list", .packages = "glmnet") %dopar% {
 }
 
 # read results
-out <- readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_1000_100_n_1000.rds")
+out <- readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_100_n_n_1000.rds")
 theta.hat <- mse.hat <- array(unlist(out), dim = c(length(k), n_mod, nsim))
 
 # biassq + var = mse
@@ -124,13 +124,9 @@ eq <- function(x){.a*x + .b + .c*x^-1 + .d*x^-2}
 pred <- eq(2:n)
 lines(pred, type = "l")
 
-# elbow point, optimal.k/n vs. n (n/10 scheme)
+# elbow point
 library("smerc")
 elbow_point(2:n, pred)$x
 samp.n <- c(250, 500, 750, 1000)
-opt.k <- c(17, 17, 8, 8)
+opt.k <- c(17, 17, 8, 5)
 plot(samp.n, opt.k/samp.n)
-
-# elbow point, optimal.k/n vs. n (n/10 scheme)
-
-

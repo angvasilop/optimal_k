@@ -62,7 +62,7 @@ where $j_i$ is the index of the $i^{th}$ element of the $j^{th}$ fold.
 
 In addition to regression with $X_1...X_5$, $f$, we under-fit with $X_1...X_3$, over-fit with $X_1...X_{20}$ and $X_1...X_{100}$, and do regression with noise $X_6...X_{100}$ only, for each $k \in$ {2, 10, 20, 30, ..., $n$} for each  $n \in$ {100, 200, 300, ..., 1000}. We perform this simulation 1000 times and then calculate simulation-wise $\mathrm{MSE}(\hat{\theta})$ for each $k$, for each $n$.
 
-We perform an additional 1000 simulations predicting $Y$ as $\hat{Y}$ by LASSO regression instead of linear regression for each $k \in$ {2, 10, $n$/10, 2$n$/10, 3$n$/10, ..., $n$} for each $n \in$ {250, 500, 750, 1000}. To avoid data leakage, we introduce an inner 5-fold cross-validation loop for the selection of parameter $\lambda$ as in the minimization of
+We perform an additional 1000 simulations predicting $Y$ as $\hat{Y}$ by LASSO regression instead of linear regression for each $k \in$ {2, 10, 20, 30, ..., 100, $n$} for each $n \in$ {250, 500, 750, 1000}. To avoid data leakage, we introduce an inner 5-fold cross-validation loop for the selection of parameter $\lambda$ as in the minimization of
 $$\sum_{i=j}^{p}(Y_j - \beta_j)^2 + \lambda\sum_{j=1}^{p}|\beta_j|.$$
 
 For each $k$, for each $n$, we count the number of times $A$ that the true model is selected and consider as optimal fold number for each $n$ the value $k_\mathrm{optimal}$, at which $A$ is the highest.
@@ -73,7 +73,8 @@ Having considered the effect of $k$ on model selection accuracy for a given $n$,
 
 To estimate $k_\mathrm{optimal}*$ for each $n$, we first fit to the dataset $(k,A)$ for each sample size $n$ a non-linear least squares model of the form
 $$\hat{A}(k) = Bk + C + Dk^{-1} + Ek^{-2}$$
-with constants $B$ to $E$ specific to each $n$ and constants $B$ and $E$ set to zero for linear regression. We then draw a line $L$ through $(k_1, \hat{A}_1)$ and $(k_n, \hat{A}_n)$ and maximize the perpendicular distance $d$ of each point on $\hat{A}$ from $L$, so that $k_\mathrm{optimal}^* = {\arg\max}_k{d[\hat{A}(k)-L]}$.
+with constants $B$ to $E$ specific to each $n$ and constants $B$ and $E$ set to zero for linear regression. We then draw a line $L$ through $(k_1, \hat{A}_1)$ and $(k_n, \hat{A}_n)$ and maximize the perpendicular distance $d$ of each point on $\hat{A}$ from $L$, so that
+$$k_\mathrm{optimal}^* = {\arg\max}_k{d[\hat{A}(k)-L]}.$$
 
 # Results and discussion
 

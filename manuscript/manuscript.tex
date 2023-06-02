@@ -219,10 +219,10 @@ simulation-wise \(\mathrm{MSE}(\hat{\theta})\) for each \(k\), for each
 
 We perform an additional 1000 simulations predicting \(Y\) as
 \(\hat{Y}\) by LASSO regression instead of linear regression for each
-\(k \in\) \{2, 10, \(n\)/10, 2\(n\)/10, 3\(n\)/10, \ldots, \(n\)\} for
-each \(n \in\) \{250, 500, 750, 1000\}. To avoid data leakage, we
-introduce an inner 5-fold cross-validation loop for the selection of
-parameter \(\lambda\) as in the minimization of
+\(k \in\) \{2, 10, 20, 30, \ldots, 100, \(n\)\} for each \(n \in\)
+\{250, 500, 750, 1000\}. To avoid data leakage, we introduce an inner
+5-fold cross-validation loop for the selection of parameter \(\lambda\)
+as in the minimization of
 \[\sum_{i=j}^{p}(Y_j - \beta_j)^2 + \lambda\sum_{j=1}^{p}|\beta_j|.\]
 
 For each \(k\), for each \(n\), we count the number of times \(A\) that
@@ -257,7 +257,7 @@ constants \(B\) to \(E\) specific to each \(n\) and constants \(B\) and
 \(E\) set to zero for linear regression. We then draw a line \(L\)
 through \((k_1, \hat{A}_1)\) and \((k_n, \hat{A}_n)\) and maximize the
 perpendicular distance \(d\) of each point on \(\hat{A}\) from \(L\), so
-that \(k_\mathrm{optimal}^* = {\arg\max}_k{d[\hat{A}(k)-L]}\).
+that \[k_\mathrm{optimal}^* = {\arg\max}_k{d[\hat{A}(k)-L]}.\]
 
 \hypertarget{results-and-discussion}{%
 \section{Results and discussion}\label{results-and-discussion}}

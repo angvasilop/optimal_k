@@ -31,18 +31,18 @@ theta <- mean((y - Ey)^2)
 variables<-list(1:3, 1:5, 1:20, 1:100, 6:100)
 
 # loop settings
-n <- c(100, 250, 500, 1000)
+n <- c(250, 500, 750, 1000)
 nsim <- 1000
-k <- list(n100 = seq(2, 100, 2),
-          n250 = c(2, seq(10, 250, 10)),
-          n500 = c(2, seq(10, 500, 10)),
-          n1000 = c(2, 10, 100, 500, 1000)) # for n = 1000
+k <- list(n250 = c(2, seq(10, 100, 10), n[1]),
+          n500 = c(2, seq(10, 100, 10), n[2]),
+          n750 = c(2, seq(10, 100, 10), n[3]),
+          n1000 = c(2, seq(10, 100, 10), n[4])) # for n = 1000
 n_mod <- length(variables)
-out <- list(n100 = readRDS("~/optimal_k_git/results/extra/parallel_simulation_lasso_output_k_2_100_n_100.rds"),
-            n250 = readRDS("~/optimal_k_git/results/extra/parallel_simulation_lasso_output_k_2_250_n_250.rds"),
-            n500 = readRDS("~/optimal_k_git/results/extra/parallel_simulation_lasso_output_k_2_500_n_500.rds"),
-            n1000 = readRDS("~/optimal_k_git/results/extra/parallel_simulation_lasso_output_k_2_1000_n_1000.rds"))
-titles <- list("n = 100", "n = 250", "n = 500", "n = 1000")
+out <- list(n250 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_100_n_n_250.rds"),
+            n500 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_100_n_n_500.rds"),
+            n750 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_100_n_n_750.rds"),
+            n1000 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_100_n_n_1000.rds"))
+titles <- list("n = 250", "n = 500", "n = 750", "n = 1000")
 plotsout <- list(list(), list(), list(), list())
 figures <- list()
 
@@ -93,8 +93,6 @@ for(i in 1:length(metrics)){
                             align = "hv", 
                             font.label = list(size = 10, color = "black", family = NULL, position = "top"))
 }
-
-
 
 figure4 <- annotate_figure(figures[[1]],
                 top = text_grob("LASSO regression: squared bias vs. k", size = 10, x = 0.4),

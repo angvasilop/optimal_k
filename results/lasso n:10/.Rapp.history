@@ -1,0 +1,2 @@
+load("/Users/angelos/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_100_n_100 copy.rds")
+load("/Users/angelos/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_1000_n_1000.rds")
