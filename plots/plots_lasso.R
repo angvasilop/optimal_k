@@ -33,15 +33,15 @@ variables<-list(1:3, 1:5, 1:20, 1:100, 6:100)
 # loop settings
 n <- c(250, 500, 750, 1000)
 nsim <- 1000
-k <- list(n250 = c(2, seq(10, 100, 10), n[1]),
-          n500 = c(2, seq(10, 100, 10), n[2]),
-          n750 = c(2, seq(10, 100, 10), n[3]),
-          n1000 = c(2, seq(10, 100, 10), n[4])) # for n = 1000
+k <- list(n250 = c(2, seq(10, n[1], 10)),
+          n500 = c(2, seq(10, n[2], 10)),
+          n750 = c(2, seq(10, n[3], 10)),
+          n1000 = c(2, seq(10, n[4], 10))) # for n = 1000
 n_mod <- length(variables)
-out <- list(n250 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_100_n_n_250.rds"),
-            n500 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_100_n_n_500.rds"),
-            n750 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_100_n_n_750.rds"),
-            n1000 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_100_n_n_1000.rds"))
+out <- list(n250 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_250_n_250.rds"),
+            n500 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_500_n_500.rds"),
+            n750 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_750_n_750.rds"),
+            n1000 = readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_1000_n_1000.rds"))
 titles <- list("n = 250", "n = 500", "n = 750", "n = 1000")
 plotsout <- list(list(), list(), list(), list())
 figures <- list()
@@ -110,6 +110,7 @@ figure6 <- annotate_figure(figures[[3]],
 counts <- list()
 corrects <- c()
 optplotsout <- list()
+pred <- list()
 for(i in 1:length(n)){
   
   # read results
@@ -121,18 +122,14 @@ for(i in 1:length(n)){
   corrects <- counts[[i]] <- colSums(results == 2)
   
   # fit
-  nls.fit <- nls(corrects ~ b*k[[i]] + c + d*k[[i]]^-1 + e*k[[i]]^-2, start = list(b = -1, c = 660, d = 14.5, e = 0))
-  .b <- coef(nls.fit)[1]
-  .c <- coef(nls.fit)[2]
-  .d <- coef(nls.fit)[3]
-  .e <- coef(nls.fit)[4]
-  eq <- function(x){.b*x + .c + .d*x^-1 + .e*x^-2}
-  pred <- eq(2:n[[i]])
+  lm.fit <- lm(corrects ~ k + I(1/k), data = data.frame(corrects = corrects, k = k[[i]]))
+  lm.pred <- predict(lm.fit, data.frame(k = 2:n[[i]]))
+  pred[[i]] <- as.numeric(lm.pred)
   
   # plot
-  optplotsout[[i]] <- ggplot(NULL)+
+  optplotsout[[i]] <- ggplot(NULL) +
     geom_point(data = data.frame(f = k[[i]], corrects), aes(x = f, y = corrects), size = 0.1) +
-    geom_line(data = data.frame(f = 2:n[[i]], pred), aes(x = f, y = pred), size = 0.4, color = "black") +
+    geom_line(data = data.frame(f = 2:n[[i]], lm.pred), aes(x = f, y = lm.pred), size = 0.4, color = "black") +
     ggtitle(paste(titles[i])) +
     labs(x = NULL, y = NULL) +
     theme(panel.grid.major=element_blank(),
@@ -140,7 +137,8 @@ for(i in 1:length(n)){
           panel.background=element_blank(),
           axis.line=element_line(colour="black", size=0.4),
           axis.text=element_text(size=10, color="black"),
-          plot.title=element_text(hjust=0.5,size=10, color = "black"))
+          plot.title=element_text(hjust=0.5,size=10, color = "black")) +
+    geom_vline(xintercept = sqrt(n[[i]]), color = "red", size = 0.4)
 }
 
 optfigures <- ggarrange(optplotsout[[1]] + rremove("ylab") + rremove("xlab"),
@@ -158,3 +156,9 @@ figure8 <- annotate_figure(optfigures,
                 top = text_grob("LASSO regression: lowest error model selection", size = 10),
                 bottom = text_grob("k", size = 10),
                 left = text_grob("Number of times true model has lowest MSE", size = 10, rot = 90))
+
+library("smerc")
+ep.lasso <- c()
+for(i in 1:length(k)){
+  ep.lasso[i] <- elbow_point(2:n[[i]], pred[[i]])$x
+}

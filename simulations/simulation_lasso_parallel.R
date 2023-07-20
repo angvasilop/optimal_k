@@ -27,7 +27,7 @@ variables <- list(1:3, 1:5, 1:20, 1:100, 6:100)
 
 # loop settings
 # 2, 10, 20, 30, ..., 100, n/2, n
-n <- 750
+n <- 1000
 k <- c(2, seq(10, n, 10))
 nsim <- 1000
 n_mod <- length(variables)
@@ -68,7 +68,7 @@ out <- foreach(j = 1:nsim, .combine = "list", .packages = "glmnet") %dopar% {
 }
 
 # read results
-out <- readRDS("~/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_100_n_n_1000.rds")
+out <- readRDS("/Users/angelos/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_1000_n_1000.rds")
 theta.hat <- mse.hat <- array(unlist(out), dim = c(length(k), n_mod, nsim))
 
 # biassq + var = mse
@@ -114,19 +114,33 @@ for(sim in 1:nsim){
 corrects <- colSums(results == 2)
 plot(k, corrects)
 
+# lm
+lm.fit <- lm(corrects ~ k + I(1/k))
+lm.pred <- predict(lm.fit, data.frame(k = 2:n))
+lines(2:n, lm.pred)
+shapiro.test(lm.fit$residuals)
+
+
+
+
+
+
+
+
 # nls
-nls.fit <- nls(corrects ~ a*k + b + c*k^-1 + d*k^-2, start = list(a = -1, b = 660, c = 14.5, d = 0))
+nls.fit <- nls(corrects ~ a*k + b + c/k, start = list(a = -1, b = 660, c = 14.5))
 .a <- coef(nls.fit)[1]
 .b <- coef(nls.fit)[2]
 .c <- coef(nls.fit)[3]
-.d <- coef(nls.fit)[4]
-eq <- function(x){.a*x + .b + .c*x^-1 + .d*x^-2}
+eq <- function(m){.a*m + .b + .c/m}
 pred <- eq(2:n)
 lines(pred, type = "l")
 
 # elbow point
 library("smerc")
 elbow_point(2:n, pred)$x
-samp.n <- c(250, 500, 750, 1000)
-opt.k <- c(17, 17, 8, 5)
-plot(samp.n, opt.k/samp.n)
+samp.n <- c(100, 250, 500, 750, 1000)
+opt.k <- c(13, 14, 20, 11, 5)# with Ax^2
+opt.k <- c(14 , 22, 32, 39, 45) # without d/k^2
+opt.k <- c(13, 17, 18, 9, 5) # with d/k^2
+plot(samp.n, opt.k)

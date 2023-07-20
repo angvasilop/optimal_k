@@ -35,26 +35,24 @@ gjm <- function(x, color = "red") {
 
 $k$-fold cross-validation is a popular method of error estimation for model selection in computational research. $n$ observations are divided into $k$ groups. In a first iteration, $i = k - 1$ groups are used as a training set. The remaining group is used as a test set to calculate estimated prediction error ($\mathrm{\widehat{PE}}$). This process is repeated $i$ times, with a different test set in each iteration. The average of $k$ estimates of $\mathrm{PE}$
 $$\hat{\theta} = CV_{(k)} = \frac{1}{k}\sum_{i=1}^{k}\mathrm{\widehat{PE}}_i$$
-is meant to estimate the true model error $\theta$, i.e., the error of the model tested on the population.
+is meant to estimate the true model error $\theta$, i.e., the error of the model tested on the population (@Bates2022).
 
 Despite the popularity of cross-validation, there is limited focus in the literature on the question of what fold number $k$ is appropriate for cross-validation with a dataset of a given size. One popular idea is that selection of $k$ comes with a bias-variance trade-off—specifically, that as $k$ increases, the bias $Bias(\hat{\theta}) = \mathrm{E}(\hat{\theta}) - \theta$ and variance $Var(\hat{\theta}) = \mathrm{E}(\hat{\theta}^2) - \mathrm{E}(\hat{\theta})^2$ of $k$-fold error estimation decrease and increase, respectively. This idea appears in early literature (@Efron1983; @Kohavi2001) but also in modern, widely used textbooks (@James2021).
 
 Subsequent, albeit limited, literature argues differently. In the case of leave-one-out cross-validation (LOOCV), i.e., with $k = n$, some authors suggest that asymptotically both bias and variance of error estimation decrease as $k$ increases (@Burman1989) and that bias and variance of error estimation are uniformly low (@Breiman1992).
 
-More recently have been proposed ways to quantify the variance reduction achieved by cross-validation when the true prediction error ($\mathrm{PE}$) is not known, e.g., as mean-square stability (@Kale2011), where
-$$\underset{S,z,z'}{\mathrm{E}}[(\ell_{\mathcal A(S)}(z) - \ell_{\mathcal A(S^{i,z'})}(z))^2] \le \beta,$$
-i.e., the expectation of the squared difference in loss $\ell$ of an algorithm $\mathcal A$ over a dataset $S$ and over a dataset $S'$ such that one element $z' \sim Z$ has been added to $S$ is less than $\beta$, which depends on the algorithm; or as loss stability (@Kumar2013), where
-$$\underset{S,z,z'}{\mathrm{E}}[(\ell'_{\mathcal A(S)}(z) - \ell'_{\mathcal A(S^{i,z'})}(z))^2] \le \gamma,$$
-$\ell'_{\mathcal A(S)}(z) = \ell_{\mathcal A(S)}(z) - \bar{\ell}_{\mathcal A(S)}(z)$, and $\gamma$ depends on the algorithm. However, it has also been demonstrated that, due to overlap between training and test sets in cross-validation, there is no universal (i.e., valid under all distributions) unbiased estimator of the variance of $k$-fold cross-validation (@Bengio2004).
+More recently have been proposed ways to quantify the variance reduction achieved by cross-validation when the true prediction error ($\mathrm{PE}$) is not known, e.g., as mean-square stability (@Kale2011) or as loss stability (@Kumar2013). However, it has also been demonstrated that, due to overlap between training and test sets in cross-validation, there is no universal (i.e., valid under all distributions) unbiased estimator of the variance of $k$-fold cross-validation (@Bengio2004).
 
 In addition to theoretical analyses of variance reduction by cross-validation, there are some simulation results showing this phenomenon. However, simulations currently in the literature provide limited insight into the dependence of optimal fold number $k_\mathrm{optimal}$ on sample size $n$ (@Zhang2015) or involve biased variance calculations (@Marcot2021). Here we present a simulation of linear regression and least absolute shrinkage and selection operator (LASSO) regression to observe the relationship of cross-validation fold number $k$ to model selection accuracy for various samples of size $n$ of a known population.
 
 # Simulation
 
+In machine learning tasks, selection of $k$ for $k$-fold cross validation is largely an arbitrary decision between, e.g., 5 and 10. With the results of the following simulation, we make a less arbitrary recommendation of $k$ with the aim of improving model selection accuracy.
+
 Consider a population of size N = 500,000 with five of $P = 100$ features $X_1...X_{100} \sim N(0, 1)$ a linear combination of feature $Y = \beta_0 + \beta_1X_1 + \cdots + \beta_5X_5 + \epsilon$
 where $\beta_1 = \cdots = \beta_5 = 1$ and $\epsilon \sim N(0, 10)$. The true model of $Y$ is $f \in F$, a set of competing models. $f = \mathrm{E}(Y) = \beta_0 + \beta_1X_1 + \cdots + \beta_5X_5$
 and its mean squared error ($\mathrm{MSE}$) is
-$$\theta = \mathrm{MSE}[\mathrm{E}(Y)] = \frac{\sum_{i=1}^{N}[Y_i - \mathrm{E}(Y_i)]^2}{N}.$$
+$$\theta = \mathrm{MSE}(f) = \frac{\sum_{i=1}^{N}[Y_i - \mathrm{E}(Y_i)]^2}{N}.$$
 
 From the population we take a sample of size $n$. We estimate $Y$ as $\hat{Y}$ by regression on a subset of $X_1...X_{100}$, regression coefficients estimated by the least squares method, and compute $\mathrm{MSE}(\hat{Y})$ by $k$-fold cross-validation as
 $$\hat{\theta} = \mathrm{MSE}(\hat{Y}) = \frac{1}{k}\sum_{j=1}^{k}\frac{\sum_{i=1}^{n/k}(Y_{j_i} - \hat{Y_{j_i}})^2}{n/k}$$
@@ -67,14 +65,47 @@ $$\sum_{i=j}^{p}(Y_j - \beta_j)^2 + \lambda\sum_{j=1}^{p}|\beta_j|.$$
 
 For each $k$, for each $n$, we count the number of times $A$ that the true model is selected and consider as optimal fold number for each $n$ the value $k_\mathrm{optimal}$, at which $A$ is the highest.
 
-This is because in practice the model with the lowest $\mathrm{\widehat{PE}}$ is more likely to be selected. We refer to this as lowest-error model selection. As our simulation results show, however, it is possible for $k$-fold cross-validation to result in calculations of $\mathrm{MSE}(\hat{\theta})$ such that a competing model $\hat{f}$ has a lower $\mathrm{\widehat{PE}}$ than the true model $f$. This false model may have the lowest $\mathrm{\widehat{PE}}$ but its generalization error will be higher in the long-run (i.e., when tested on a large part of the population) than the generalization error of the true model. Thus, it is preferable for the value of $k$ selected to result in $f$ having the lowest $\mathrm{\widehat{PE}}$.
+This is because in practice the model with the lowest $\mathrm{\widehat{PE}}$ is more likely to be selected. We refer to this as lowest-error model selection. As our simulation results show, however, it is possible for $k$-fold cross-validation to result in calculations of $\mathrm{MSE}(\hat{\theta})$ such that a competing model $\hat{f} \in F$ has a lower $\mathrm{\widehat{PE}}$ than the true model $f$. This false model may have the lowest $\mathrm{\widehat{PE}}$ but its generalization error will be higher in the long-run (i.e., when tested on a large part of the population) than the generalization error of the true model. Thus, it is preferable for the value of $k$ selected to result in $f$ having the lowest $\mathrm{\widehat{PE}}$.
 
 Having considered the effect of $k$ on model selection accuracy for a given $n$, we may also consider the relationship of $k_\mathrm{optimal}$ and $n$. Our results suggest that after a certain value of $k$, changes in $A$ become negligible, in the case of linear regression, or negative, in the case of LASSO regression, and resource-expensive increases of fold number become undesirable. We refer to this "point of diminishing returns" as $k_\mathrm{optimal}^*$.
 
-To estimate $k_\mathrm{optimal}*$ for each $n$, we first fit to the dataset $(k,A)$ for each sample size $n$ a non-linear least squares model of the form
-$$\hat{A}(k) = Bk + C + Dk^{-1} + Ek^{-2}$$
-with constants $B$ to $E$ specific to each $n$ and constants $B$ and $E$ set to zero for linear regression. We then draw a line $L$ through $(k_1, \hat{A}_1)$ and $(k_n, \hat{A}_n)$ and maximize the perpendicular distance $d$ of each point on $\hat{A}$ from $L$, so that
-$$k_\mathrm{optimal}^* = {\arg\max}_k{d[\hat{A}(k)-L]}.$$
+To estimate $k_\mathrm{optimal}*$ for each $n$, we first fit to the dataset $(k,A)$ for each sample size $n$ a model of the form
+$$\hat{A}(k) = Bk + C + \frac{D}{k}$$
+with constants $B$ to $D$ specific to each $n$. Certain more complicated models (e.g., with higher-order terms) may provide better approximation of $A$ but make optimization by the following scheme non-trivial. We draw a line $L$ through $(k_1, \hat{A}_1)$ and $(k_n, \hat{A}_n)$ and maximize the perpendicular distance $d$ of each point on $\hat{A}$ from $L$, so that
+\begin{align*}
+k^*_{\mathrm{optimal}} &= {\arg\max}_k{d[\hat{A}(k),L]} \\
+                       &= {\arg\max}_k{d[Bk+C+\frac{D}{k},y-(Bn+C+\frac{D}{n})=m(x-n)]} \\
+                       &= {\arg\max}_k{d[Bk+C+\frac{D}{k},y-(Bn+C+\frac{D}{n})=\frac{(Bn+C+\frac{D}{n})-(2B+C+\frac{D}{2})}{n-2}(x-n)]} \\
+                       &= {\arg\max}_k{d[Bk+C+\frac{D}{k},y-(Bn+C+\frac{D}{n})=(B-\frac{D}{2n})(x-n)]} \\
+                       &= {\arg\max}_k{d[Bk+C+\frac{D}{k},(B-\frac{D}{2n})x-y+C+\frac{D}{2}+\frac{D}{n}=0]}. \\
+\end{align*}
+It is known that the distance $d$ between a point $(k, \hat{A}(k))$ and a line of the form
+$$ax + by + c = 0$$
+is
+\begin{align*}
+d = \frac{|ak + b\hat{A}(k) + c|}{\sqrt{a^2+b^2}}
+\end{align*}
+so
+\begin{align*}
+k^*_{\mathrm{optimal}} &= {\arg\max}_k{d[Bk+C+\frac{D}{k},(B-\frac{D}{2n})x-y+C+\frac{D}{2}+\frac{D}{n}=0]} \\
+                       &= {\arg\max}_k{\frac{|(B-\frac{D}{2n})k-(Bk+C+\frac{D}{k})+(C+\frac{D}{2}+\frac{D}{n})|}{\sqrt{(B-\frac{D}{2n})^2+(-1)^2}}}.
+\end{align*}
+Maximizing $d$, knowing that $n$ and $k$ are always positive, we find that
+\begin{align*}
+\frac{d}{dk}d[\hat{A}(k),L] &= \frac{d}{dk}\left(\frac{|(B-\frac{D}{2n})k-(Bk+C+\frac{D}{k})+(C+\frac{D}{2}+\frac{D}{n})|}{\sqrt{(B-\frac{D}{2n})^2+(-1)^2}}\right) \\
+                            &=\frac{|n||k|(2nD-Dk^2)(-Dk^2-2nD+nDk+2Dk)}{nk^3|-Dk^2-2nD+nDk+2Dk|\sqrt{D^2+4n^2}} = 0 \\
+                            &\Rightarrow k = 0, 2, \sqrt{2n}, n.
+\end{align*}
+Evaluating $d$ at these four values of $k$, we find that
+\begin{align*}
+d(0) &= \mathrm{DNE} \\
+d(2) &= 0 \\
+d(\sqrt{2n}) &=  \frac{|nD+2D-\sqrt{2n}D-D|}{\sqrt{(B-\frac{D}{2n})^2+(-1)^2}} \\
+d(n) &= 0.
+\end{align*}
+Since $d(\sqrt{2n}) > 0$,
+$$k^*_{\mathrm{optimal}} = \sqrt{2n}$$
+which fits the relationship of $k^*_{\mathrm{optimal}}$ vs. $n$ (Figure 9).
 
 # Results and discussion
 
@@ -128,11 +159,11 @@ figure5
 figure6
 ```
 
-```{r echo=FALSE, fig.height = 8, fig.cap = "Count of true linear regression model selection by the lowest-error criterion vs. fold number for various sample sizes."}
+```{r echo=FALSE, fig.height = 8, fig.cap = "Count of true linear regression model selection by the lowest-error criterion vs. fold number for various sample sizes. Red line indicates optimal value of k."}
 figure7
 ```
 
-```{r echo=FALSE, fig.cap = "Count of true LASSO regression model selection by the lowest-error criterion vs. fold number for various sample sizes."}
+```{r echo=FALSE, fig.cap = "Count of true LASSO regression model selection by the lowest-error criterion vs. fold number for various sample sizes. Red line indicates optimal value of k."}
 figure8
 ```
 

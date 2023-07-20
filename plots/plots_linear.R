@@ -128,6 +128,7 @@ figure3 <- annotate_figure(figures[[3]],
 counts <- list()
 corrects <- c()
 optplotsout <- list()
+pred <- list()
 library(tidyr)
 for(i in 1:length(n)){
   
@@ -140,16 +141,14 @@ for(i in 1:length(n)){
   corrects <- counts[[i]] <- colSums(results == 2)
   
   # fit
-  nls.fit <- nls(corrects ~ c + d*k[[i]]^-1, start = list(c = 660, d = -14.5))
-  .c <- coef(nls.fit)[1]
-  .d <- coef(nls.fit)[2]
-  eq <- function(x){.c + .d*x^-1}
-  pred <- eq(2:n[[i]])
+  lm.fit <- lm(corrects ~ k + I(1/k), data = data.frame(corrects = corrects, k = k[[i]]))
+  lm.pred <- predict(lm.fit, data.frame(k = 2:n[[i]]))
+  pred[[i]] <- as.numeric(lm.pred)
   
   # plot
   optplotsout[[i]] <- ggplot(NULL)+
     geom_point(data = data.frame(f = k[[i]], corrects), aes(x = f, y = corrects), size = 0.1) +
-    geom_line(data = data.frame(f = 2:n[[i]], pred), aes(x = f, y = pred), size = 0.4, color = "black") +
+    geom_line(data = data.frame(f = 2:n[[i]], lm.pred), aes(x = f, y = lm.pred), size = 0.4, color = "black") +
     ggtitle(paste(titles[i])) +
     labs(x = NULL, y = NULL) +
     theme(panel.grid.major=element_blank(),
@@ -157,7 +156,8 @@ for(i in 1:length(n)){
           panel.background=element_blank(),
           axis.line=element_line(colour="black", size=0.4),
           axis.text=element_text(size=10, color="black"),
-          plot.title=element_text(hjust=0.5,size=10, color = "black"))
+          plot.title=element_text(hjust=0.5,size=10, color = "black")) +
+    geom_vline(xintercept = sqrt(n[[i]]), color = "red", size = 0.4)
 }
 
 optfigures <- ggarrange(optplotsout[[1]] + rremove("ylab") + rremove("xlab"),
@@ -182,15 +182,22 @@ figure7 <- annotate_figure(optfigures,
                            bottom = text_grob("k", size = 10),
                            left = text_grob("Number of times true model had lowest MSE", size = 10, rot = 90))
 
+library("smerc")
+ep.linear <- c()
+for(i in 1:length(k)){
+  ep.linear[i] <- elbow_point(2:n[[i]], pred[[i]])$x
+}
+
 samp.n.linear <- seq(100, 1000, 100)
-opt.k.linear <- c(14, 20, 24, 28, 32, 35, 37, 40, 42, 45)
+opt.k.linear <- c(14, 20, 25, 28, 32, 35, 37, 40, 42, 45)
 opt.k.prop.linear <- opt.k.linear/samp.n.linear
 
-samp.n.lasso <- c(100, 250, 500, 1000)
-opt.k.lasso <- c(14, 22, 32, 45)
+samp.n.lasso <- c(250, 500, 750, 1000)
+opt.k.lasso <- c(22, 32, 39, 45)
 opt.k.prop.lasso <- opt.k.lasso/samp.n.lasso
 
 opt.k.raw <- ggplot(data.frame(f = samp.n.linear, opt.k.linear), aes(x = f, y = opt.k.linear))+
+  geom_line(data = data.frame(f = min(n):max(n), g = sqrt(2*(min(n):max(n)))), aes(x = f, y = g), size = 0.4, color = "black") +
   geom_point(aes(color = "Linear regression"), size = 0.4) +
   geom_point(data = data.frame(f = samp.n.lasso, opt.k.lasso), aes(x = f, y = opt.k.lasso, color = "LASSO regression"), size = 0.4) +
   labs(x = NULL, y = NULL) +
@@ -212,6 +219,7 @@ opt.k.raw <- ggplot(data.frame(f = samp.n.linear, opt.k.linear), aes(x = f, y = 
   scale_colour_manual(name = "Model", values = c("blue", "red"))
 
 opt.k.prop <- ggplot(data.frame(f = samp.n.linear, opt.k.prop.linear), aes(x = f, y = opt.k.prop.linear))+
+  geom_line(data = data.frame(f = min(n):max(n), g = sqrt(2*(min(n):max(n)))/(min(n):max(n))), aes(x = f, y = g), size = 0.4, color = "black") +
   geom_point(aes(color = "Linear regression"), size = 0.4) +
   geom_point(data = data.frame(f = samp.n.lasso, opt.k.prop.lasso), aes(x = f, y = opt.k.prop.lasso, color = "LASSO regression"), size = 0.4) +
   labs(x = NULL, y = NULL) +
@@ -239,6 +247,3 @@ figure9 <- ggarrange(opt.k.raw, opt.k.prop,
             legend = "right",
             align = "hv", 
             font.label = list(size = 10, color = "black", family = NULL, position = "top"))
-
-
-

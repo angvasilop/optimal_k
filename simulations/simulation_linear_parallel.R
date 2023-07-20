@@ -26,7 +26,7 @@ theta <- mean((y - Ey)^2)
 variables<-list(1:3, 1:5, 1:20, 1:100, 6:100)
 
 # loop settings
-n <- 400
+n <- 100
 nsim <- 1000
 k <- c(2, seq(10, n, 10)) # c(2, 10, 100, 500, 1000)
 n_mod <- length(variables)
@@ -46,7 +46,7 @@ library(doParallel)
 registerDoParallel(makeCluster(detectCores() - 1))
 
 # loop
-set.seed(2022)
+set.seed(2025)
 out <- foreach(j = 1:nsim, .combine = "list") %dopar% {
   ind <- sample(1:N, n, replace = FALSE)
   for(l in 1:length(k)){
@@ -65,7 +65,7 @@ out <- foreach(j = 1:nsim, .combine = "list") %dopar% {
 }
 
 # read results
-out <- readRDS("~/optimal_k_git/results/linear/parallel_simulation_linear_output_k_2_400_n_00.rds")
+out <- readRDS("~/Downloads/parallel_simulation_linear_output_k_2_100_n_100_d.rds")
 theta.hat <- mse.hat <- array(unlist(out), dim = c(length(k), n_mod, nsim), dimnames = list(rep("k", length(k)), rep("mod", n_mod), rep("sim", nsim)))
 
 # biassq + var = mse
@@ -123,11 +123,8 @@ lines(pred, type = "l")
 library("smerc")
 elbow_point(2:n, pred)$x
 samp.n <- seq(100, 1000, 100)
-opt.k <- c(14/100, 20/200, 24/300, 28/400, 32/500, 35/600, 37/700, 40/800, 42/900, 45/1000) # departing from LOOCV
-plot(samp.n, opt.k)
-
-
-
+opt.k <- c(14, 20, 24, 28, 32, 35, 37, 40, 42, 45) # departing from LOOCV
+plot(samp.n, opt.k/samp.n)
 
 
 

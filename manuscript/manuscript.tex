@@ -133,7 +133,8 @@ process is repeated \(i\) times, with a different test set in each
 iteration. The average of \(k\) estimates of \(\mathrm{PE}\)
 \[\hat{\theta} = CV_{(k)} = \frac{1}{k}\sum_{i=1}^{k}\mathrm{\widehat{PE}}_i\]
 is meant to estimate the true model error \(\theta\), i.e., the error of
-the model tested on the population.
+the model tested on the population (Bates, Hastie, and Tibshirani
+(\protect\hyperlink{ref-Bates2022}{2022})).
 
 Despite the popularity of cross-validation, there is limited focus in
 the literature on the question of what fold number \(k\) is appropriate
@@ -159,21 +160,12 @@ of error estimation are uniformly low (Breiman and Spector
 More recently have been proposed ways to quantify the variance reduction
 achieved by cross-validation when the true prediction error
 (\(\mathrm{PE}\)) is not known, e.g., as mean-square stability (Kale,
-Kumar, and Vassilvitskii (\protect\hyperlink{ref-Kale2011}{2011})),
-where
-\[\underset{S,z,z'}{\mathrm{E}}[(\ell_{\mathcal A(S)}(z) - \ell_{\mathcal A(S^{i,z'})}(z))^2] \le \beta,\]
-i.e., the expectation of the squared difference in loss \(\ell\) of an
-algorithm \(\mathcal A\) over a dataset \(S\) and over a dataset \(S'\)
-such that one element \(z' \sim Z\) has been added to \(S\) is less than
-\(\beta\), which depends on the algorithm; or as loss stability (Kumar
-et al. (\protect\hyperlink{ref-Kumar2013}{2013})), where
-\[\underset{S,z,z'}{\mathrm{E}}[(\ell'_{\mathcal A(S)}(z) - \ell'_{\mathcal A(S^{i,z'})}(z))^2] \le \gamma,\]
-\(\ell'_{\mathcal A(S)}(z) = \ell_{\mathcal A(S)}(z) - \bar{\ell}_{\mathcal A(S)}(z)\),
-and \(\gamma\) depends on the algorithm. However, it has also been
-demonstrated that, due to overlap between training and test sets in
-cross-validation, there is no universal (i.e., valid under all
-distributions) unbiased estimator of the variance of \(k\)-fold
-cross-validation (Bengio and Grandvalet
+Kumar, and Vassilvitskii (\protect\hyperlink{ref-Kale2011}{2011})) or as
+loss stability (Kumar et al. (\protect\hyperlink{ref-Kumar2013}{2013})).
+However, it has also been demonstrated that, due to overlap between
+training and test sets in cross-validation, there is no universal (i.e.,
+valid under all distributions) unbiased estimator of the variance of
+\(k\)-fold cross-validation (Bengio and Grandvalet
 (\protect\hyperlink{ref-Bengio2004}{2004})).
 
 In addition to theoretical analyses of variance reduction by
@@ -192,6 +184,12 @@ various samples of size \(n\) of a known population.
 \hypertarget{simulation}{%
 \section{Simulation}\label{simulation}}
 
+In machine learning tasks, selection of \(k\) for \(k\)-fold cross
+validation is largely an arbitrary decision between, e.g., 5 and 10.
+With the results of the following simulation, we make a less arbitrary
+recommendation of \(k\) with the aim of improving model selection
+accuracy.
+
 Consider a population of size N = 500,000 with five of \(P = 100\)
 features \(X_1...X_{100} \sim N(0, 1)\) a linear combination of feature
 \(Y = \beta_0 + \beta_1X_1 + \cdots + \beta_5X_5 + \epsilon\) where
@@ -199,7 +197,7 @@ features \(X_1...X_{100} \sim N(0, 1)\) a linear combination of feature
 true model of \(Y\) is \(f \in F\), a set of competing models.
 \(f = \mathrm{E}(Y) = \beta_0 + \beta_1X_1 + \cdots + \beta_5X_5\) and
 its mean squared error (\(\mathrm{MSE}\)) is
-\[\theta = \mathrm{MSE}[\mathrm{E}(Y)] = \frac{\sum_{i=1}^{N}[Y_i - \mathrm{E}(Y_i)]^2}{N}.\]
+\[\theta = \mathrm{MSE}(f) = \frac{\sum_{i=1}^{N}[Y_i - \mathrm{E}(Y_i)]^2}{N}.\]
 
 From the population we take a sample of size \(n\). We estimate \(Y\) as
 \(\hat{Y}\) by regression on a subset of \(X_1...X_{100}\), regression
@@ -234,8 +232,8 @@ This is because in practice the model with the lowest
 this as lowest-error model selection. As our simulation results show,
 however, it is possible for \(k\)-fold cross-validation to result in
 calculations of \(\mathrm{MSE}(\hat{\theta})\) such that a competing
-model \(\hat{f}\) has a lower \(\mathrm{\widehat{PE}}\) than the true
-model \(f\). This false model may have the lowest
+model \(\hat{f} \in F\) has a lower \(\mathrm{\widehat{PE}}\) than the
+true model \(f\). This false model may have the lowest
 \(\mathrm{\widehat{PE}}\) but its generalization error will be higher in
 the long-run (i.e., when tested on a large part of the population) than
 the generalization error of the true model. Thus, it is preferable for
@@ -251,13 +249,40 @@ resource-expensive increases of fold number become undesirable. We refer
 to this ``point of diminishing returns'' as \(k_\mathrm{optimal}^*\).
 
 To estimate \(k_\mathrm{optimal}*\) for each \(n\), we first fit to the
-dataset \((k,A)\) for each sample size \(n\) a non-linear least squares
-model of the form \[\hat{A}(k) = Bk + C + Dk^{-1} + Ek^{-2}\] with
-constants \(B\) to \(E\) specific to each \(n\) and constants \(B\) and
-\(E\) set to zero for linear regression. We then draw a line \(L\)
+dataset \((k,A)\) for each sample size \(n\) a model of the form
+\[\hat{A}(k) = Bk + C + \frac{D}{k}\] with constants \(B\) to \(D\)
+specific to each \(n\). Certain more complicated models (e.g., with
+higher-order terms) may provide better approximation of \(A\) but make
+optimization by the following scheme non-trivial. We draw a line \(L\)
 through \((k_1, \hat{A}_1)\) and \((k_n, \hat{A}_n)\) and maximize the
 perpendicular distance \(d\) of each point on \(\hat{A}\) from \(L\), so
-that \[k_\mathrm{optimal}^* = {\arg\max}_k{d[\hat{A}(k)-L]}.\]
+that \begin{align*}
+k^*_{\mathrm{optimal}} &= {\arg\max}_k{d[\hat{A}(k),L]} \\
+                       &= {\arg\max}_k{d[Bk+C+\frac{D}{k},y-(Bn+C+\frac{D}{n})=m(x-n)]} \\
+                       &= {\arg\max}_k{d[Bk+C+\frac{D}{k},y-(Bn+C+\frac{D}{n})=\frac{(Bn+C+\frac{D}{n})-(2B+C+\frac{D}{2})}{n-2}(x-n)]} \\
+                       &= {\arg\max}_k{d[Bk+C+\frac{D}{k},y-(Bn+C+\frac{D}{n})=(B-\frac{D}{2n})(x-n)]} \\
+                       &= {\arg\max}_k{d[Bk+C+\frac{D}{k},(B-\frac{D}{2n})x-y+C+\frac{D}{2}+\frac{D}{n}=0]}. \\
+\end{align*} It is known that the distance \(d\) between a point
+\((k, \hat{A}(k))\) and a line of the form \[ax + by + c = 0\] is
+\begin{align*}
+d = \frac{|ak + b\hat{A}(k) + c|}{\sqrt{a^2+b^2}}
+\end{align*} so \begin{align*}
+k^*_{\mathrm{optimal}} &= {\arg\max}_k{d[Bk+C+\frac{D}{k},(B-\frac{D}{2n})x-y+C+\frac{D}{2}+\frac{D}{n}=0]} \\
+                       &= {\arg\max}_k{\frac{|(B-\frac{D}{2n})k-(Bk+C+\frac{D}{k})+(C+\frac{D}{2}+\frac{D}{n})|}{\sqrt{(B-\frac{D}{2n})^2+(-1)^2}}}.
+\end{align*} Maximizing \(d\), knowing that \(n\) and \(k\) are always
+positive, we find that \begin{align*}
+\frac{d}{dk}d[\hat{A}(k),L] &= \frac{d}{dk}\left(\frac{|(B-\frac{D}{2n})k-(Bk+C+\frac{D}{k})+(C+\frac{D}{2}+\frac{D}{n})|}{\sqrt{(B-\frac{D}{2n})^2+(-1)^2}}\right) \\
+                            &=\frac{|n||k|(2nD-Dk^2)(-Dk^2-2nD+nDk+2Dk)}{nk^3|-Dk^2-2nD+nDk+2Dk|\sqrt{D^2+4n^2}} = 0 \\
+                            &\Rightarrow k = 0, 2, \sqrt{2n}, n.
+\end{align*} Evaluating \(d\) at these four values of \(k\), we find
+that \begin{align*}
+d(0) &= \mathrm{DNE} \\
+d(2) &= 0 \\
+d(\sqrt{2n}) &=  \frac{|nD+2D-\sqrt{2n}D-D|}{\sqrt{(B-\frac{D}{2n})^2+(-1)^2}} \\
+d(n) &= 0.
+\end{align*} Since \(d(\sqrt{2n}) > 0\),
+\[k^*_{\mathrm{optimal}} = \sqrt{2n}\] which fits the relationship of
+\(k^*_{\mathrm{optimal}}\) vs.~\(n\) (Figure 9).
 
 \hypertarget{results-and-discussion}{%
 \section{Results and discussion}\label{results-and-discussion}}
@@ -413,7 +438,7 @@ variable in the inner loop, outer loop, or both.
 
 }
 
-\caption{Count of true linear regression model selection by the lowest-error criterion vs. fold number for various sample sizes.}\label{fig:unnamed-chunk-7}
+\caption{Count of true linear regression model selection by the lowest-error criterion vs. fold number for various sample sizes. Red line indicates optimal value of k.}\label{fig:unnamed-chunk-7}
 \end{figure}
 
 \begin{figure}[H]
@@ -422,7 +447,7 @@ variable in the inner loop, outer loop, or both.
 
 }
 
-\caption{Count of true LASSO regression model selection by the lowest-error criterion vs. fold number for various sample sizes.}\label{fig:unnamed-chunk-8}
+\caption{Count of true LASSO regression model selection by the lowest-error criterion vs. fold number for various sample sizes. Red line indicates optimal value of k.}\label{fig:unnamed-chunk-8}
 \end{figure}
 
 \begin{figure}[H]
@@ -453,6 +478,11 @@ available at \url{https://github.com/gjm112/optimal_k}.
 
 \hypertarget{refs}{}
 \begin{CSLReferences}{1}{0}
+\leavevmode\vadjust pre{\hypertarget{ref-Bates2022}{}}%
+Bates, Stephen, Trevor Hastie, and Robert Tibshirani. 2022.
+{``Cross-Validation: What Does It Estimate and How Well Does It Do
+It?''} \url{https://arxiv.org/abs/2104.00673}.
+
 \leavevmode\vadjust pre{\hypertarget{ref-Bengio2004}{}}%
 Bengio, Yoshua, and Yves Grandvalet. 2004. {``No Unbiased Estimator of
 the Variance of k-Fold Cross-Validation.''} \emph{Journal of Machine
