@@ -27,8 +27,8 @@ variables <- list(1:3, 1:5, 1:20, 1:100, 6:100)
 
 # loop settings
 # 2, 10, 20, 30, ..., 100, n/2, n
-n <- 1000
-k <- c(2, seq(10, n, 10))
+n <- 100
+k <- seq(2, 100, 2)
 nsim <- 1000
 n_mod <- length(variables)
 
@@ -68,7 +68,7 @@ out <- foreach(j = 1:nsim, .combine = "list", .packages = "glmnet") %dopar% {
 }
 
 # read results
-out <- readRDS("/Users/angelos/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_1000_n_1000.rds")
+out <- readRDS("/Users/angelos/optimal_k_git/results/lasso/parallel_simulation_lasso_output_k_2_100_n_100.rds")
 theta.hat <- mse.hat <- array(unlist(out), dim = c(length(k), n_mod, nsim))
 
 # biassq + var = mse
@@ -119,10 +119,6 @@ lm.fit <- lm(corrects ~ k + I(1/k))
 lm.pred <- predict(lm.fit, data.frame(k = 2:n))
 lines(2:n, lm.pred)
 shapiro.test(lm.fit$residuals)
-
-
-
-
 
 
 

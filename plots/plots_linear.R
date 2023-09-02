@@ -44,7 +44,7 @@ k <- list(n100 = c(2, seq(10, 100, 10)),
           n900 = c(2, seq(10, 900, 10)),
           n1000 = c(2, seq(10, 1000, 10)))
 n_mod <- length(variables)
-out <- list(n100 = readRDS("~/optimal_k_git/results/linear/parallel_simulation_linear_output_k_2_100_n_100.rds"),
+out <- list(n100 = readRDS("~/optimal_k_git/results/linear/parallel_simulation_linear_output_k_2_100_n_100_corrected.rds"),
             n200 = readRDS("~/optimal_k_git/results/linear/parallel_simulation_linear_output_k_2_200_n_200.rds"),
             n300 = readRDS("~/optimal_k_git/results/linear/parallel_simulation_linear_output_k_2_300_n_300.rds"),
             n400 = readRDS("~/optimal_k_git/results/linear/parallel_simulation_linear_output_k_2_400_n_400.rds"),
@@ -192,8 +192,8 @@ samp.n.linear <- seq(100, 1000, 100)
 opt.k.linear <- c(14, 20, 25, 28, 32, 35, 37, 40, 42, 45)
 opt.k.prop.linear <- opt.k.linear/samp.n.linear
 
-samp.n.lasso <- c(250, 500, 750, 1000)
-opt.k.lasso <- c(22, 32, 39, 45)
+samp.n.lasso <- c(100, 250, 500, 750, 1000)
+opt.k.lasso <- c(14, 22, 32, 39, 45)
 opt.k.prop.lasso <- opt.k.lasso/samp.n.lasso
 
 opt.k.raw <- ggplot(data.frame(f = samp.n.linear, opt.k.linear), aes(x = f, y = opt.k.linear))+

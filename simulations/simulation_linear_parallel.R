@@ -65,8 +65,11 @@ out <- foreach(j = 1:nsim, .combine = "list") %dopar% {
 }
 
 # read results
-out <- readRDS("~/Downloads/parallel_simulation_linear_output_k_2_100_n_100_d.rds")
+out <- readRDS("/Users/angelos/optimal_k_git/results/linear/parallel_simulation_linear_output_k_2_100_n_100.rds")
 theta.hat <- mse.hat <- array(unlist(out), dim = c(length(k), n_mod, nsim), dimnames = list(rep("k", length(k)), rep("mod", n_mod), rep("sim", nsim)))
+
+theta.hat[,c(4,5),] <- NA
+saveRDS(theta.hat, "parallel_simulation_linear_output_k_2_100_n_100_corrected.rds")
 
 # biassq + var = mse
 biassq <- (apply(theta.hat, c(1, 2), mean) - theta)^2
@@ -77,7 +80,7 @@ mse <- apply((theta.hat - theta)^2, c(1, 2), mean)
 library(plotrix)
 
 # bias^2 plots
-plot(k, biassq[, 1], type = "b", ylim = c(min(biassq), max(biassq)), ylab = "bias^2")
+plot(k, biassq[, 5], type = "b", ylab = "bias^2")
 points(k, biassq[, 2], type = "b", col = "blue")
 points(k, biassq[, 3], type = "b", col = "red")
 points(k, biassq[, 4], type = "b", col = "purple")

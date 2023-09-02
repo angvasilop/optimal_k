@@ -306,6 +306,15 @@ near-optimal choice for large \(n\), for smaller samples and linear
 regression other values of \(k\) appear to be optimal for model
 selection (Figures 7 and 8).
 
+Note that the case of linear regression with \(n = 100\) and number of
+features \(p = 100\) is not displayed because there are
+\(n - p - 1 = -1\) degrees of freedom, which is not a sufficient number
+for regression. The case of \(n = 100\) and \(p = 95\) degrees of
+freedom is similarly problematic and is not displayed because the high
+level of error in bias, variance, and \(\mathrm{MSE}\) estimation
+associated with \(n - p - 1 = 5\) degrees of freedom obscures important
+patterns in the rest of the data.
+
 As previous authors have noted (Zhang and Yang
 (\protect\hyperlink{ref-Zhang2015}{2015})), it is important to
 distinguish between possible goals of cross-validation that previously

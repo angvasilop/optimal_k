@@ -14,7 +14,7 @@ fontsize: 12pt
 link-citations: yes
 linkcolor: cyan
 urlcolor: cyan
-bibliography: /Users/angelos/Documents/research/optimal_k/manuscript/optimal_k_references.bib
+bibliography: /Users/angelos/optimal_k_git/manuscript/optimal_k_references.bib
 header-includes: \usepackage{setspace} \setstretch{1.15} \usepackage{float} \floatplacement{figure}{t} \usepackage[labelsep=period]{caption}
 indent: TRUE
 ---
@@ -112,6 +112,8 @@ which fits the relationship of $k^*_{\mathrm{optimal}}$ vs. $n$ (Figure 9).
 Interpretations of early literature have resulted in lasting misconceptions about the use of cross-validation. Such misconceptions include the idea that there is a bias-variance trade-off $Bias^2(\hat{\theta}) \propto 1/Var(\hat{\theta})$ associated with selection of $k$ and that $k = 10$ is the best value to use in $k$-fold cross-validation (@Kohavi2001).
 
 In agreement with a small but growing body of literature, our simulation results suggest that neither of these ideas are necessarily correct. Instead, in the context of linear and LASSO regression with standard normal data and certain random error, we find that for various $n$ both bias and variance decrease as $k$ increases (Figures 1 - 6), i.e., $Bias^2(\hat{\theta}) \propto Var(\hat{\theta})$, and although in the case of LASSO, 10-fold cross-validation seems to be a near-optimal choice for large $n$, for smaller samples and linear regression other values of $k$ appear to be optimal for model selection (Figures 7 and 8).
+
+Note that the case of linear regression with $n = 100$ and number of features $p = 100$ is not displayed because there are $n - p - 1 = -1$ degrees of freedom, which is not a sufficient number for regression. The case of $n = 100$ and $p = 95$ degrees of freedom is similarly problematic and is not displayed because the high level of error in bias, variance, and $\mathrm{MSE}$ estimation associated with $n - p - 1 = 5$ degrees of freedom obscures important patterns in the rest of the data.
 
 As previous authors have noted (@Zhang2015), it is important to distinguish between possible goals of cross-validation that previously have been conflated (@Kohavi2001): estimation of $\mathrm{PE}$, in which case $k_\mathrm{optimal} = {\arg\min}_{k}(\mathrm{PE} - \mathrm{\widehat{PE}})$, and model selection, in which case $$k_\mathrm{optimal} = {\arg\max}_k(A)$$, which is related to the definition of $k_\mathrm{optimal}^*$ used in this study.
 
